@@ -38,13 +38,18 @@ router.post('/create', auth, async (req, res) => {
   }
 });
 
-router.get('/studentclasseslist', async (req, res) => {
+router.get('/studentclasseslist', auth, async (req, res) => {
   try {
-    const { courseName } = req.query; // Extract courseName from query parameters
+    // Find the student user
+    const student = await User.findById(req.user.userId);
 
-    if (!courseName) {
-      return res.status(400).json({ message: 'Course name is required in the query parameters' });
+    // Check if the user is a student
+    if (student.role !== 'student') {
+      return res.status(403).json({ message: 'Only students are allowed to access their classes' });
     }
+
+    // Extract courseName from the student's details
+    const { courseName } = student;
 
     // Fetch classes with the same courseName
     const similarClasses = await Class.find({ courseName });
@@ -55,7 +60,6 @@ router.get('/studentclasseslist', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 
 router.get('/', async (req, res) => {
   try {
