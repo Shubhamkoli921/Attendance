@@ -100,7 +100,7 @@ router.post('/:classId/attendance', auth, async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
   }
-});
+});//changes marayche ahet aaplyala course name and years ani class id
 
 
 // Retrieve Attendance Information Endpoint
