@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 
 router.post('/signup', async (req, res) => {
   try {
-    const { username, password, role } = req.body;
+    const { name,username, password, role } = req.body;
     const existingUser = await User.findOne({ username });
 
     if (existingUser) {
@@ -17,7 +17,7 @@ router.post('/signup', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, password: hashedPassword, role });
+    const newUser = new User({ name,username, password: hashedPassword, role });
     await newUser.save();
     res.status(201).json({ message: 'User created successfully' });
   } catch (error) {

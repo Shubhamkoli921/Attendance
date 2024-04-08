@@ -38,6 +38,40 @@ router.post('/create', auth, async (req, res) => {
   }
 });
 
+router.get('/studentclasseslist', async (req, res) => {
+  try {
+    const { courseName } = req.query; // Extract courseName from query parameters
+
+    if (!courseName) {
+      return res.status(400).json({ message: 'Course name is required in the query parameters' });
+    }
+
+    // Fetch classes with the same courseName
+    const similarClasses = await Class.find({ courseName });
+
+    res.status(200).json({ similarClasses });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+router.get('/', async (req, res) => {
+  try {
+    const teacherId = req.query.teacherId; // Extract teacherId from query parameters
+
+    // Fetch classes taught by the specified teacher
+    const classes = await Class.find({ teacher: teacherId });
+
+    res.status(200).json({ classes });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
 // Mark Attendance Endpoint (for students)
 router.post('/:classId/attendance', auth, async (req, res) => {
   try {
