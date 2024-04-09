@@ -86,6 +86,12 @@ router.post("/markattendance", auth, async (req, res) => {
     const { classId, status } = req.body;
     const studentId = req.user.userId;
 
+    // Check if the student has already marked attendance for this class
+    const existingAttendance = await Attendance.findOne({ student: studentId, class: classId });
+    if (existingAttendance) {
+      return res.status(400).json({ message: "Attendance already marked for this class" });
+    }
+
     // Find the class by ID
     const classInfo = await Class.findById(classId);
     if (!classInfo) {
@@ -147,6 +153,7 @@ router.post("/markattendance", auth, async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 
 // Mark Attendance Endpoint (for students)
