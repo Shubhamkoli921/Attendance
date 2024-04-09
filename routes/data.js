@@ -40,14 +40,22 @@ router.get('/attendance/:classId', auth, async (req, res) => {
     try {
       const studentId = req.user.userId;
   
-      // Find attendance records for the student
-      const attendanceRecords = await Attendance.find({ student: studentId }).populate('class');
+      // Find attendance records for the student and populate class details
+      const attendanceRecords = await Attendance.find({ student: studentId }).populate({
+        path: 'class',
+        populate: {
+          path: 'teacher',
+          select: 'name' // Select only the name of the teacher
+        }
+      });
   
-      // Extract class details from attendance records
+      // Extract class details along with timestamp and teacher name from attendance records
       const attendedClasses = attendanceRecords.map(record => ({
         className: record.class.name,
         courseName: record.class.courseName,
-        year: record.class.year
+        year: record.class.year,
+        timestamp: record.timestamp,
+        teacherName: record.class.teacher.name // Get the name of the teacher
       }));
   
       res.status(200).json({ attendedClasses });
@@ -56,6 +64,7 @@ router.get('/attendance/:classId', auth, async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
     }
   });
+  
   
   
   module.exports = router
