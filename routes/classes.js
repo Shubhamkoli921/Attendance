@@ -57,15 +57,33 @@ router.get("/studentclasseslist", auth, async (req, res) => {
     // Extract courseName from the student's details
     const { courseName } = student;
 
-    // Fetch classes with the same courseName
-    const similarClasses = await Class.find({ courseName });
+    // Fetch classes with the same courseName and populate the teacher field
+    const similarClasses = await Class.find({ courseName }).populate('teacher');
 
-    res.status(200).json({ similarClasses });
+    // Map each class object to include teacher's name
+    const classesWithTeacherName = similarClasses.map(classObj => {
+      return {
+        _id: classObj._id,
+        name: classObj.name,
+        courseName: classObj.courseName,
+        year: classObj.year,
+        startTime: classObj.startTime,
+        endTime: classObj.endTime,
+        attendance: classObj.attendance,
+        teacherName: classObj.teacher.name // Extract teacher's name directly
+      };
+    });
+
+    res.status(200).json({ similarClasses: classesWithTeacherName });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
+
+
 
 router.get("/", async (req, res) => {
   try {
