@@ -11,6 +11,7 @@ const classSchema = new Schema({
   endTime: { type: Date, required: true },
   attendance: [{
     student: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    studentName: { type: String, required: true }, // Add studentName field
     status: { type: String, enum: ['present', 'absent'], required: true },
     timestamp: { type: Date, default: Date.now }
   }]

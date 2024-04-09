@@ -4,6 +4,7 @@ const auth = require("../middleware/auth");
 const Class = require("../models/class");
 const User = require("../models/users");
 const Attendance = require("../models/attendance");
+const mongoose = require("mongoose");
 
 router.post("/create", auth, async (req, res) => {
   try {
@@ -80,7 +81,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post('/markattendance', auth, async (req, res) => {
+router.post("/markattendance", auth, async (req, res) => {
   try {
     const { classId, status } = req.body;
     const studentId = req.user.userId;
@@ -88,45 +89,64 @@ router.post('/markattendance', auth, async (req, res) => {
     // Find the class by ID
     const classInfo = await Class.findById(classId);
     if (!classInfo) {
-      return res.status(404).json({ message: 'Class not found' });
+      return res.status(404).json({ message: "Class not found" });
     }
 
     // Check if the provided classId matches the class created course name and year
-    if (classInfo.courseName !== req.body.courseName || classInfo.year !== req.body.year) {
-      return res.status(400).json({ message: 'Course name or year does not match with the class' });
+    if (
+      classInfo.courseName !== req.body.courseName ||
+      classInfo.year !== req.body.year
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Course name or year does not match with the class" });
     }
 
     // Check if the class is currently active (within its start and end time)
     const currentTime = new Date();
     if (currentTime < classInfo.startTime || currentTime > classInfo.endTime) {
-      return res.status(403).json({ message: 'Class is not currently active' });
+      return res.status(403).json({ message: "Class is not currently active" });
     }
 
     // Check if the status is valid
-    if (status !== 'present' && status !== 'absent') {
-      return res.status(400).json({ message: 'Invalid attendance status' });
+    if (status !== "present" && status !== "absent") {
+      return res.status(400).json({ message: "Invalid attendance status" });
     }
 
-    // Update Class collection with student's attendance
-    classInfo.attendance.push({ student: studentId, status, timestamp: currentTime });
+    // Fetch the student's information
+    const student = await User.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // Update Class collection with student's attendance including status, timestamp, and name
+    classInfo.attendance.push({
+      student: studentId,
+      studentName: student.name, // Include student's name
+      status,
+      timestamp: currentTime,
+    });
     await classInfo.save();
 
     // Save attendance details in Attendance collection
     const attendanceRecord = new Attendance({
       student: studentId,
       class: classId,
+      studentName: student.name,
       status,
-      timestamp: currentTime
+      timestamp: currentTime,
     });
     await attendanceRecord.save();
 
-    res.status(200).json({ message: 'Attendance marked successfully' });
+    res.status(200).json({
+      message: "Attendance marked successfully",
+      studentName: student.name,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: "Internal server error" });
   }
 });
-
 
 
 // Mark Attendance Endpoint (for students)
