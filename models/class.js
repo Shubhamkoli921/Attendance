@@ -9,7 +9,11 @@ const classSchema = new Schema({
   teacher: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   startTime: { type: Date, required: true },
   endTime: { type: Date, required: true },
-  attendance: [{ type: Schema.Types.ObjectId, ref: 'User' }] // Array of student IDs who marked attendance
+  attendance: [{
+    student: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    status: { type: String, enum: ['present', 'absent'], required: true },
+    timestamp: { type: Date, default: Date.now }
+  }]
 });
 
 module.exports = mongoose.model('Class', classSchema);

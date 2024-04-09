@@ -29,13 +29,13 @@ app.get('/', (req, res) => {
 const authRoutes = require('./routes/auth');
 const classRoutes = require('./routes/classes');
 const attendanceRoutes = require('./routes/attendance');
-const formfilled = require('./routes/formfilled')
+const data = require('./routes/data')
 
 // routes 
 app.use('/api/auth', authRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/attendance', attendanceRoutes);
-app.use('/api/form',formfilled)
+app.use('/api/data',data)
 
 
 
